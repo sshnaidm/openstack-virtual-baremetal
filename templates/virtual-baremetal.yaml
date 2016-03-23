@@ -30,17 +30,16 @@ parameters:
     type: number
     default: 1
 
-  public_net:
-    type: string
-    default: public
-
   private_net:
     type: string
     default: private
 
-  provision_net:
-    type: string
-    default: provision
+  networks:
+    type: comma_delimited_list
+    default: [provision]
+    description: |
+      A list of networks to attach to the baremetal instances.  Note that the
+      first network listed should be the provisioning network.
 
   bmc_prefix:
     type: string
@@ -79,12 +78,9 @@ parameters:
   external_net:
     type: string
     default: ''
-  public_net_name:
-    type: string
-    default: ''
-  provision_net_name:
-    type: string
-    default: ''
+  network_count:
+    type: number
+    default: 0
 
 resources:
   # NOTE(bnemec): This should probably be limited to allowing only
@@ -171,12 +167,8 @@ resources:
           baremetal_flavor: {get_param: baremetal_flavor}
           baremetal_image: {get_param: baremetal_image}
           key_name: {get_param: key_name}
-          public_net: {get_param: public_net}
-          public_sg: {get_resource: public_sg}
           private_net: {get_param: private_net}
           private_sg: {get_resource: private_sg}
-          provision_net: {get_param: provision_net}
-          provision_sg: {get_resource: provision_sg}
           suffix: _%index%
           bmc_prefix: {get_param: bmc_prefix}
           baremetal_prefix: {get_param: baremetal_prefix}
@@ -184,3 +176,4 @@ resources:
           os_password: {get_param: os_password}
           os_tenant: {get_param: os_tenant}
           os_auth_url: {get_param: os_auth_url}
+          networks: {get_param: networks}

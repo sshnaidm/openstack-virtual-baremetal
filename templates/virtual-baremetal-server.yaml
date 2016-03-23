@@ -1,4 +1,4 @@
-heat_template_version: 2014-10-16
+heat_template_version: 2015-04-30
 
 parameters:
   bmc_flavor:
@@ -22,23 +22,14 @@ parameters:
   baremetal_prefix:
     type: string
 
-  public_net:
-    type: string
-
-  public_sg:
-    type: string
-
   private_net:
     type: string
 
   private_sg:
     type: string
 
-  provision_net:
-    type: string
-
-  provision_sg:
-    type: string
+  networks:
+    type: comma_delimited_list
 
   suffix:
     type: string
@@ -68,16 +59,6 @@ resources:
           - {get_param: suffix}
       network: {get_param: private_net}
 
-  baremetal_port:
-    type: OS::Neutron::Port
-    properties:
-      name:
-        list_join:
-        - ''
-        - - {get_param: baremetal_prefix}
-          - {get_param: suffix}
-      network: {get_param: provision_net}
-
   baremetal_server:
     type: OS::Nova::Server
     properties:
@@ -85,12 +66,13 @@ resources:
       image: {get_param: baremetal_image}
       config_drive: false
       key_name: {get_param: key_name}
-      # security_groups:
-      # TODO(bnemec): Reattach these when it doesn't wreak havoc on TripleO to have multiple nics.
-      #- {get_param: public_sg}
       networks:
-      - port: {get_resource: baremetal_port}
-      #- network: {get_param: public_net}
+        repeat:
+          for_each:
+            <%network%>: {get_param: networks}
+          template:
+            network: <%network%>
+
       name:
         list_join:
         - ''

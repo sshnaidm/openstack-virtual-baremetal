@@ -52,11 +52,10 @@ EOF
 
 for i in $(seq 1 $bm_node_count)
 do
-    bm_port="$bm_prefix_$(($i-1))"
-    bm_instance=$(neutron port-show $bm_port -c device_id -f value)
+    bm_instance="$bm_prefix_$(($i-1))"
     bmc_port="$bmc_prefix_$(($i-1))"
     bmc_ip=$(neutron port-show $bmc_port -c fixed_ips -f value | jq -r .ip_address)
-    unit="openstack-bmc-$bm_port.service"
+    unit="openstack-bmc-$bm_instance.service"
 
     cat <<EOF >/usr/lib/systemd/system/$unit
 [Unit]
@@ -84,8 +83,8 @@ systemctl enable config-bmc-ips
 
 for i in $(seq 1 $bm_node_count)
 do
-    bm_port="$bm_prefix_$(($i-1))"
-    unit="openstack-bmc-$bm_port.service"
+    bm_instance="$bm_prefix_$(($i-1))"
+    unit="openstack-bmc-$bm_instance.service"
     systemctl enable $unit
     systemctl start $unit
     systemctl status $unit

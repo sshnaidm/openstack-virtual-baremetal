@@ -79,16 +79,15 @@ def main():
     all_ports = sorted(neutron.list_ports()['ports'], key=lambda x: x['name'])
     bmc_ports = list([p for p in all_ports
                      if p['name'].startswith(bmc_base)])
-    bm_ports = list([p for p in all_ports
-                    if p['name'].startswith(baremetal_base)])
-    if len(bmc_ports) != len(bm_ports):
-        raise RuntimeError('Found different numbers of baremetal and '
-                           'bmc ports.')
+    baremetals = nova.servers.list(search_opts={'name': baremetal_base + '_.*'})
+    baremetals = sorted(baremetals, key=lambda x: x.name)
+    if len(bmc_ports) != len(baremetals):
+        raise RuntimeError('Found different numbers of baremetal instances '
+                           'and bmc ports.')
     nodes = []
     bmc_bm_pairs = []
 
-    for bmc_port, baremetal_port in zip(bmc_ports, bm_ports):
-        baremetal = nova.servers.get(baremetal_port['device_id'])
+    for bmc_port, baremetal in zip(bmc_ports, baremetals):
         node = dict(node_template)
         node['pm_addr'] = bmc_port['fixed_ips'][0]['ip_address']
         bmc_bm_pairs.append((node['pm_addr'], baremetal.name))

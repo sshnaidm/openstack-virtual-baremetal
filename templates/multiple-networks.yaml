@@ -1,0 +1,56 @@
+heat_template_version: 2014-10-16
+
+parameters:
+  prefix:
+    type: string
+    default: baremetal
+    description: Prefix for the name of each network
+  count:
+    type: number
+    default: 6
+    description: Number of networks to create
+
+resources:
+  multiple_networks:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: {get_param: count}
+      resource_def:
+        type: OS::Neutron::Net
+        properties:
+          name:
+            list_join:
+              - '_'
+              - - {get_param: prefix}
+                - '%index%'
+
+  multiple_subnets:
+    type: OS::Heat::ResourceGroup
+    depends_on: multiple_networks
+    properties:
+      count: {get_param: count}
+      resource_def:
+        type: OS::Neutron::Subnet
+        properties:
+          enable_dhcp: False
+          gateway_ip: ''
+          name:
+            list_join:
+              - '_'
+              - - {get_param: prefix}
+                - '%index%'
+          network:
+            list_join:
+              - '_'
+              - - {get_param: prefix}
+                - '%index%'
+          cidr:
+            list_join:
+              - ''
+              - - '10.'
+                - '%index%'
+                - '.0.0/24'
+
+outputs:
+  networks:
+    value: {get_attr: [multiple_networks, refs]}

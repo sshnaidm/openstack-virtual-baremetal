@@ -41,13 +41,12 @@ parameters:
     default: external
     description: An external network from which floating ips can be provisioned
 
-  provision_net:
-    type: string
-    default: provision
-
-  public_net:
-    type: string
-    default: public
+  network_count:
+    type: number
+    default: 2
+    description: Number of additional networks to attach to each instance
+    constraints:
+      - range: {min: 2}
 
   bmc_prefix:
     type: string
@@ -93,34 +92,17 @@ parameters:
   os_auth_url:
     type: string
 
+  # Ignored parameters for compatibility with virtual-baremetal.yaml
+  networks:
+    type: comma_delimited_list
+    default: ''
+
 resources:
-  provision_network:
-    type: OS::Neutron::Net
+  multiple_networks:
+    type: OS::OVB::MultipleNetworks
     properties:
-        name: {get_param: provision_net}
-
-  provision_subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      network: {get_resource: provision_network}
-      name: provision-subnet
-      cidr: 192.0.2.0/24
-      gateway_ip: null
-      enable_dhcp: false
-
-  public_network:
-    type: OS::Neutron::Net
-    properties:
-      name: {get_param: public_net}
-
-  public_subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      network: {get_resource: public_network}
-      name: public-subnet
-      cidr: 10.0.0.0/24
-      gateway_ip: null
-      enable_dhcp: false
+      prefix: {get_param: baremetal_prefix}
+      count: {get_param: network_count}
 
   undercloud_sg:
     type: OS::Neutron::SecurityGroup
@@ -161,8 +143,8 @@ resources:
       - {get_resource: all_sg}
       networks:
       - network: {get_attr: [private_network, private_net]}
-      - network: {get_resource: provision_network}
-      - network: {get_resource: public_network}
+      - network: {get_attr: [multiple_networks, networks, 0]}
+      - network: {get_attr: [multiple_networks, networks, 1]}
       name: {get_param: undercloud_name}
       user_data_format: {get_param: undercloud_user_data_format}
       user_data: {get_param: undercloud_user_data}
@@ -186,9 +168,7 @@ resources:
       baremetal_image: {get_param: baremetal_image}
       key_name: {get_param: key_name}
       node_count: {get_param: node_count}
-      public_net: {get_resource: public_network}
       private_net: {get_attr: [private_network, private_net]}
-      provision_net: {get_resource: provision_network}
       bmc_flavor: {get_param: bmc_flavor}
       bmc_prefix: {get_param: bmc_prefix}
       bmc_flavor: {get_param: bmc_flavor}
@@ -198,6 +178,7 @@ resources:
       os_password: {get_param: os_password}
       os_tenant: {get_param: os_tenant}
       os_auth_url: {get_param: os_auth_url}
+      networks: {get_attr: [multiple_networks, networks]}
 
 outputs:
   undercloud_host_floating_ip:
