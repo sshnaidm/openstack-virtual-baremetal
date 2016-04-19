@@ -1,4 +1,4 @@
-heat_template_version: 2014-10-16
+heat_template_version: 2015-10-15
 
 description: Template for deploying OpenStack BMC nodes.  Can be wrapped in a ResourceGroup for scaling.
 
@@ -111,6 +111,7 @@ resources:
         - - 'utility'
           - {get_param: bmc_prefix}
       network: {get_param: private_net}
+      port_security_enabled: False
 
   bmc_other_ports:
     type: OS::Heat::ResourceGroup

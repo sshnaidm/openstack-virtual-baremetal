@@ -27,6 +27,7 @@ resources:
         - - {get_param: baremetal_prefix}
           - {get_param: suffix}
       network: {get_param: provision_net}
+      port_security_enabled: False
 
 outputs:
   ports:

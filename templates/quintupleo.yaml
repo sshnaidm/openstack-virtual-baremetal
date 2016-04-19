@@ -1,4 +1,4 @@
-heat_template_version: 2015-04-30
+heat_template_version: 2015-10-15
 
 # Template that wraps virtual-baremetal.yaml and does some additional environment
 # setup automatically:
@@ -119,6 +119,17 @@ resources:
       gateway_ip: null
       enable_dhcp: false
 
+  provision_undercloud_port:
+    type: OS::Neutron::Port
+    properties:
+      name:
+        list_join:
+        - '_'
+        - - {get_param: undercloud_name}
+          - 'provision'
+      network: {get_resource: provision_network}
+      port_security_enabled: False
+
   public_network:
     type: OS::Neutron::Net
     properties:
@@ -173,7 +184,7 @@ resources:
       - {get_resource: all_sg}
       networks:
       - network: {get_attr: [private_network, private_net]}
-      - network: {get_resource: provision_network}
+      - port: {get_resource: provision_undercloud_port}
       - network: {get_resource: public_network}
       name: {get_param: undercloud_name}
       user_data_format: {get_param: undercloud_user_data_format}
