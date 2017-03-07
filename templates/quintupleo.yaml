@@ -174,17 +174,6 @@ resources:
       gateway_ip: null
       enable_dhcp: false
 
-  provision_undercloud_port:
-    type: OS::Neutron::Port
-    properties:
-      name:
-        list_join:
-        - '_'
-        - - {get_param: undercloud_name}
-          - 'provision'
-      network: {get_resource: provision_network}
-      port_security_enabled: False
-
   public_network:
     type: OS::Neutron::Net
     properties:
