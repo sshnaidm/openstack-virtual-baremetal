@@ -34,16 +34,6 @@ resources:
         port_range_min: 22
         port_range_max: 22
 
-  all_sg:
-     type: OS::Neutron::SecurityGroup
-     properties:
-       name: all_sg
-       description: Allows all traffic
-       rules:
-       - protocol: icmp
-       - protocol: tcp
-       - protocol: udp
-
   private_undercloud_port:
     type: OS::Neutron::Port
     properties:
