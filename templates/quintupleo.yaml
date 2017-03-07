@@ -202,12 +202,6 @@ resources:
       undercloud_flavor: {get_param: undercloud_flavor}
       undercloud_image: {get_param: undercloud_image}
       key_name: {get_param: key_name}
-      security_groups:
-      - {get_resource: undercloud_sg}
-      networks:
-      - network: {get_attr: [private_network, private_net]}
-      - port: {get_resource: provision_undercloud_port}
-      - network: {get_resource: public_network}
       undercloud_name: {get_param: undercloud_name}
       undercloud_user_data_format: {get_param: undercloud_user_data_format}
       undercloud_user_data: {get_param: undercloud_user_data}
