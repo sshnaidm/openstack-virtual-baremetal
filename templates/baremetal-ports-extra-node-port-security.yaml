@@ -31,6 +31,8 @@ resources:
           - {get_param: baremetal_prefix}
           - {get_param: suffix}
       network: {get_param: private_net}
+      port_security_enabled: False
+ 
 
   provision_port:
     type: OS::Neutron::Port
